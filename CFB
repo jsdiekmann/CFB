@@ -3,6 +3,7 @@ import requests
 import pandas as pd
 
 # Average of Team A points/game and Team B points allowed/game and vice versa
+
 matchup_url = "https://www.teamrankings.com/ncf/schedules/season/"
 off_ppg_url = "https://www.teamrankings.com/college-football/stat/points-per-game"
 def_ppg_url = "https://www.teamrankings.com/college-football/stat/opponent-points-per-game"
@@ -18,6 +19,7 @@ matchup_soup = BeautifulSoup(matchup_page.text, "html.parser")
 off_ppg_soup = BeautifulSoup(off_ppg_page.text, "html.parser")
 def_ppg_soup = BeautifulSoup(def_ppg_page.text, "html.parser")
 
+# Creates a dataframe from the Offense PPG table
 off_ppg_titles_obj = off_ppg_soup.find_all('th')
 off_ppg_titles = [title.text for title in off_ppg_titles_obj]
 off_ppg_df = pd.DataFrame(columns = off_ppg_titles)
