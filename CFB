@@ -1,0 +1,50 @@
+from bs4 import BeautifulSoup
+import requests
+import pandas as pd
+
+# Average of Team A points/game and Team B points allowed/game and vice versa
+matchup_url = "https://www.teamrankings.com/ncf/schedules/season/"
+off_ppg_url = "https://www.teamrankings.com/college-football/stat/points-per-game"
+def_ppg_url = "https://www.teamrankings.com/college-football/stat/opponent-points-per-game"
+
+try:
+    matchup_page = requests.get(matchup_url)
+    off_ppg_page = requests.get(off_ppg_url)
+    def_ppg_page = requests.get(def_ppg_url)
+except requests.RequestException as e:
+    print(f"Error retrieving {e}")
+
+matchup_soup = BeautifulSoup(matchup_page.text, "html.parser")
+off_ppg_soup = BeautifulSoup(off_ppg_page.text, "html.parser")
+def_ppg_soup = BeautifulSoup(def_ppg_page.text, "html.parser")
+
+off_ppg_titles_obj = off_ppg_soup.find_all('th')
+off_ppg_titles = [title.text for title in off_ppg_titles_obj]
+off_ppg_df = pd.DataFrame(columns = off_ppg_titles)
+off_ppg_column_data = off_ppg_soup.find_all('tr')
+
+for row in off_ppg_column_data[1:]:
+    row_data = row.find_all('td')
+    row_data_info = [info.text.strip() for info in row_data]
+    
+    length = len(off_ppg_df)
+    off_ppg_df.loc[length] = row_data_info
+    
+off_ppg_df['2024'] = pd.to_numeric(off_ppg_df['2024'])
+highest_scorers_df = off_ppg_df[off_ppg_df['2024'] > 35]
+
+
+def_ppg_titles_obj = def_ppg_soup.find_all('th')
+def_ppg_titles = [title.text for title in def_ppg_titles_obj]
+def_ppg_df = pd.DataFrame(columns = def_ppg_titles)
+def_ppg_column_data = def_ppg_soup.find_all('tr')
+
+for row in def_ppg_column_data[1:]:
+    row_data = row.find_all('td')
+    row_data_info = [info.text.strip() for info in row_data]
+    
+    length = len(def_ppg_df)
+    def_ppg_df.loc[length] = row_data_info
+    
+def_ppg_df['2024'] = pd.to_numeric(def_ppg_df['2024'])
+fewsest_points_allowed_df = def_ppg_df[def_ppg_df['2024'] < 20]
