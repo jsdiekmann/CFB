@@ -1,7 +1,9 @@
-
 from bs4 import BeautifulSoup
 import requests
 import pandas as pd
+import re
+
+# Need to create data frame of stat tables and then use those to make comparisons so we are not scraping every time
 
 # Average of Team A points/game and Team B points allowed/game and vice versa
 
@@ -20,6 +22,17 @@ matchup_soup = BeautifulSoup(matchup_page.text, "html.parser")
 off_ppg_soup = BeautifulSoup(off_ppg_page.text, "html.parser")
 def_ppg_soup = BeautifulSoup(def_ppg_page.text, "html.parser")
 
+# Fetches and assigns home team and away team for search of table
+matchup_data = matchup_soup.find_all('tr')
+for row in matchup_data:
+    cols = row.find_all('td')
+    if not cols:
+        continue
+    matchup = cols[0].get_text(strip=True)
+    matchup_array = re.split(r'(?:@|vs\.)', matchup)
+    home_team = matchup_array[1].strip()
+    away_team = matchup_array[0].strip()
+    
 # Creates a dataframe from the Offense PPG table
 off_ppg_titles_obj = off_ppg_soup.find_all('th')
 off_ppg_titles = [title.text for title in off_ppg_titles_obj]
