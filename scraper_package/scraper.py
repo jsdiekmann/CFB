@@ -22,7 +22,9 @@ matchup_soup = BeautifulSoup(matchup_page.text, "html.parser")
 off_ppg_soup = BeautifulSoup(off_ppg_page.text, "html.parser")
 def_ppg_soup = BeautifulSoup(def_ppg_page.text, "html.parser")
 
-# Fetches and assigns home team and away team for search of table
+# Fetches and assigns home team and away team for search of 
+matchup_titles = ["Away", "Home"]
+matchup_df = pd.DataFrame(columns=matchup_titles)
 matchup_data = matchup_soup.find_all('tr')
 for row in matchup_data:
     cols = row.find_all('td')
@@ -32,6 +34,10 @@ for row in matchup_data:
     matchup_array = re.split(r'(?:@|vs\.)', matchup)
     home_team = matchup_array[1].strip()
     away_team = matchup_array[0].strip()
+    teams = [away_team, home_team]
+    length = len(matchup_df)
+    matchup_df.loc[length] = teams
+
     
 # Creates a dataframe from the Offense PPG table
 off_ppg_titles_obj = off_ppg_soup.find_all('th')
@@ -47,7 +53,7 @@ for row in off_ppg_column_data[1:]:
     off_ppg_df.loc[length] = row_data_info
     
 off_ppg_df['2024'] = pd.to_numeric(off_ppg_df['2024'])
-highest_scorers_df = off_ppg_df[off_ppg_df['2024'] > 35]
+# highest_scorers_df = off_ppg_df[off_ppg_df['2024'] > 35]
 
 
 def_ppg_titles_obj = def_ppg_soup.find_all('th')
@@ -63,4 +69,4 @@ for row in def_ppg_column_data[1:]:
     def_ppg_df.loc[length] = row_data_info
     
 def_ppg_df['2024'] = pd.to_numeric(def_ppg_df['2024'])
-fewsest_points_allowed_df = def_ppg_df[def_ppg_df['2024'] < 20]
+# fewsest_points_allowed_df = def_ppg_df[def_ppg_df['2024'] < 20]
