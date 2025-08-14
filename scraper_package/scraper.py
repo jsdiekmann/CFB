@@ -88,3 +88,39 @@ off_td_column_data = off_td_soup.find_all('tr')
 
 for row in off_td_column_data[1:]:
     row_data = row.find_all('td')
+    row_data_info = [info.text.strip() for info in row_data]
+
+    length = len(off_td_df)
+    off_td_df.loc[length] = row_data_info
+
+off_td_df['2024'] = pd.to_numeric(off_td_df['2024'])
+
+# Creates a dataframe from the Defensive TD table
+def_td_titles_obj = def_td_soup.find_all('th')
+def_td_titles = [title.text for title in def_td_titles_obj]
+def_td_df = pd.DataFrame(columns = def_td_titles)
+def_td_column_data = def_td_soup.find_all('tr')
+
+for row in def_td_column_data[1:]:
+    row_data = row.find_all('td')
+    row_data_info = [info.text.strip() for info in row_data]
+
+    length = len(def_td_df)
+    def_td_df.loc[length] = row_data_info
+
+def_td_df['2024'] = pd.to_numeric(def_td_df['2024'])
+
+# Creates a dataframe from the TO Ratio table
+to_margin_titles_obj = to_margin_soup.find_all('th')
+to_margin_titles = [title.text for title in to_margin_titles_obj]
+to_margin_df = pd.DataFrame(columns = to_margin_titles)
+to_margin_column_data = to_margin_soup.find_all('tr')
+
+for row in to_margin_column_data[1:]:
+    row_data = row.find_all('td')
+    row_data_info = [info.text.strip() for info in row_data]
+
+    length = len(to_margin_df)
+    to_margin_df.loc[length] = row_data_info
+
+to_margin_df['2024'] = pd.to_numeric(to_margin_df['2024'])
