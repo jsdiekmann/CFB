@@ -1,4 +1,4 @@
-from scraper_package import off_ppg_df, def_ppg_df, matchup_df, off_td_df, def_td_df, to_margin_df
+from ..scraper_package import off_ppg_df, def_ppg_df, matchup_df, off_td_df, def_td_df, to_margin_df
 import pandas as pd
 import numpy as np
 
