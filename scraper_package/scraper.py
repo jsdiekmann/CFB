@@ -62,7 +62,7 @@ for row in off_ppg_column_data[1:]:
     length = len(off_ppg_df)
     off_ppg_df.loc[length] = row_data_info
     
-off_ppg_df['2024'] = pd.to_numeric(off_ppg_df['2024'])
+off_ppg_df['2025'] = pd.to_numeric(off_ppg_df['2025'])
 
 # Creates a dataframe from the Defense PPG table
 def_ppg_titles_obj = def_ppg_soup.find_all('th')
@@ -77,7 +77,7 @@ for row in def_ppg_column_data[1:]:
     length = len(def_ppg_df)
     def_ppg_df.loc[length] = row_data_info
     
-def_ppg_df['2024'] = pd.to_numeric(def_ppg_df['2024'])
+def_ppg_df['2025'] = pd.to_numeric(def_ppg_df['2025'])
 
 
 # Creates a dataframe from the Offensive TD table
@@ -93,7 +93,7 @@ for row in off_td_column_data[1:]:
     length = len(off_td_df)
     off_td_df.loc[length] = row_data_info
 
-off_td_df['2024'] = pd.to_numeric(off_td_df['2024'])
+off_td_df['2025'] = pd.to_numeric(off_td_df['2025'])
 
 # Creates a dataframe from the Defensive TD table
 def_td_titles_obj = def_td_soup.find_all('th')
@@ -108,7 +108,7 @@ for row in def_td_column_data[1:]:
     length = len(def_td_df)
     def_td_df.loc[length] = row_data_info
 
-def_td_df['2024'] = pd.to_numeric(def_td_df['2024'])
+def_td_df['2025'] = pd.to_numeric(def_td_df['2025'])
 
 # Creates a dataframe from the TO Ratio table
 to_margin_titles_obj = to_margin_soup.find_all('th')
@@ -123,4 +123,4 @@ for row in to_margin_column_data[1:]:
     length = len(to_margin_df)
     to_margin_df.loc[length] = row_data_info
 
-to_margin_df['2024'] = pd.to_numeric(to_margin_df['2024'])
+to_margin_df['2025'] = pd.to_numeric(to_margin_df['2025'])
