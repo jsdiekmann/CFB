@@ -60,7 +60,8 @@ for row in off_ppg_column_data[1:]:
     row_data_info = [info.text.strip() for info in row_data]
     
     length = len(off_ppg_df)
-    off_ppg_df.loc[length] = row_data_info
+    if row_data_info[2] != '--':
+        off_ppg_df.loc[length] = row_data_info
     
 off_ppg_df['2025'] = pd.to_numeric(off_ppg_df['2025'])
 
@@ -75,7 +76,8 @@ for row in def_ppg_column_data[1:]:
     row_data_info = [info.text.strip() for info in row_data]
     
     length = len(def_ppg_df)
-    def_ppg_df.loc[length] = row_data_info
+    if row_data_info[2] != '--':
+        def_ppg_df.loc[length] = row_data_info
     
 def_ppg_df['2025'] = pd.to_numeric(def_ppg_df['2025'])
 
@@ -91,7 +93,8 @@ for row in off_td_column_data[1:]:
     row_data_info = [info.text.strip() for info in row_data]
 
     length = len(off_td_df)
-    off_td_df.loc[length] = row_data_info
+    if row_data_info[2] != '--':
+        off_td_df.loc[length] = row_data_info
 
 off_td_df['2025'] = pd.to_numeric(off_td_df['2025'])
 
@@ -106,7 +109,8 @@ for row in def_td_column_data[1:]:
     row_data_info = [info.text.strip() for info in row_data]
 
     length = len(def_td_df)
-    def_td_df.loc[length] = row_data_info
+    if row_data_info[2] != '--':
+        def_td_df.loc[length] = row_data_info
 
 def_td_df['2025'] = pd.to_numeric(def_td_df['2025'])
 
@@ -121,6 +125,7 @@ for row in to_margin_column_data[1:]:
     row_data_info = [info.text.strip() for info in row_data]
 
     length = len(to_margin_df)
-    to_margin_df.loc[length] = row_data_info
+    if row_data_info[2] != '--':
+        to_margin_df.loc[length] = row_data_info
 
 to_margin_df['2025'] = pd.to_numeric(to_margin_df['2025'])
