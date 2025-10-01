@@ -1,0 +1,3 @@
+[submodule "ncaa-api"]
+	path = ncaa-api
+	url = https://github.com/henrygd/ncaa-api.git
