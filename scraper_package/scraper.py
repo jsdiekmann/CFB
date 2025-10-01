@@ -7,7 +7,7 @@ import re
 
 # Average of Team A points/game and Team B points allowed/game and vice versa
 
-matchup_url = "https://www.teamrankings.com/ncf/schedules/season/"
+matchup_url = "https://www.teamrankings.com/ncf/schedules/season/?week=1272"
 off_ppg_url = "https://www.teamrankings.com/college-football/stat/points-per-game"
 off_td_url = "https://www.teamrankings.com/college-football/stat/offensive-touchdowns-per-game"
 def_ppg_url = "https://www.teamrankings.com/college-football/stat/opponent-points-per-game"
