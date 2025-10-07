@@ -1,9 +1,8 @@
-from CFB.scraper_package.scraper import off_ppg_df, def_ppg_df, matchup_df, off_td_df, def_td_df, to_margin_df
+from CFB.scraper_package.scraper import off_ppg_df, def_ppg_df, matchup_df, off_td_df, def_td_df, to_margin_df, ppd_df
 import pandas as pd
 import numpy as np
 
 bet_df = pd.DataFrame(columns=["Home", "Expected Points", "TD/TO", "Away", "Expected Points", "TD/TO", "Total Expected Points", "TD/DO Differential"])
-
 
 team_stats_df = (
     off_ppg_df[["Team", "2025"]].rename(columns={"2025": "Off_PPG"})
@@ -11,6 +10,8 @@ team_stats_df = (
     .merge(off_td_df[["Team", "2025"]].rename(columns={"2025": "Off_TD"}), on="Team")
     .merge(def_td_df[["Team", "2025"]].rename(columns={"2025": "Def_TD"}), on="Team")
     .merge(to_margin_df[["Team", "2025"]].rename(columns={"2025": "TO_Margin"}), on="Team")
+    .merge(ppd_df[["Team", "OPD"]])
+    .merge(ppd_df[["Team", "DPD"]])
 )
 
 team_stats_df.set_index('Team', inplace=True)
@@ -31,11 +32,24 @@ def compute_td_to(off_td, def_td, to_margin):
     """TD/TO metric"""
     return off_td - def_td + to_margin
 
+def compute_exp_drives(off_ppg, def_ppg, off_ppd, def_ppd):
+    off_drives = off_ppg / off_ppd
+    def_drives = def_ppg / def_ppd
+    return safe_avg(off_drives, def_drives)
+
+def calculate_exp_points(drives, opd, dpd, oppg, dppg):
+    drive_points = safe_avg(drives * opd, drives * dpd)
+    game_points = safe_avg(oppg, dppg)
+    return safe_avg(drive_points, game_points)
+
 bet_rows = []
 
 for _, row in matchup_with_stats.iterrows():
-    home_exp_ppg = safe_avg(row['Home_Off_PPG'], row['Away_Def_PPG'])
-    away_exp_ppg = safe_avg(row['Away_Off_PPG'], row['Home_Def_PPG'])
+    home_expected_drives = compute_exp_drives(row['Home_Off_PPG'], row['Away_Def_PPG'], row['Home_OPD'], row['Away_DPD'])
+    away_expected_drives = compute_exp_drives(row['Away_Off_PPG'], row['Home_Def_PPG'], row['Away_OPD'], row['Home_DPD'])
+    game_expected_drives = safe_avg(home_expected_drives, away_expected_drives)
+    home_exp_ppg = calculate_exp_points(game_expected_drives, row['Home_OPD'], row['Away_DPD'], row['Home_Off_PPG'], row['Away_Def_PPG'])
+    away_exp_ppg = calculate_exp_points(game_expected_drives, row['Away_OPD'], row['Home_DPD'], row['Away_Off_PPG'], row['Home_Def_PPG'])
     favorite = row['Home'] if home_exp_ppg - away_exp_ppg > 0 else row['Away'] if home_exp_ppg - away_exp_ppg < 0 else 'Pick \'em'
     dog = row['Away'] if home_exp_ppg - away_exp_ppg > 0 else row['Home'] if home_exp_ppg - away_exp_ppg < 0 else 'Pick \'em'
     

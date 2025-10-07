@@ -1,0 +1,6 @@
+beautifulsoup4==4.12.2
+pandas==2.2.1
+numpy==1.26.4
+gspread==6.1.2
+google-auth==2.40.3
+gspread-dataframe==4.0.0

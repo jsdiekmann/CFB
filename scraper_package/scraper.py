@@ -2,17 +2,19 @@ from bs4 import BeautifulSoup
 import requests
 import pandas as pd
 import re
+from CFB.scraper_package import teamnames
 
 # Need to create data frame of stat tables and then use those to make comparisons so we are not scraping every time
 
 # Average of Team A points/game and Team B points allowed/game and vice versa
 
-matchup_url = "https://www.teamrankings.com/ncf/schedules/season/?week=1272"
+matchup_url = "https://www.teamrankings.com/ncf/schedules/season/"
 off_ppg_url = "https://www.teamrankings.com/college-football/stat/points-per-game"
 off_td_url = "https://www.teamrankings.com/college-football/stat/offensive-touchdowns-per-game"
 def_ppg_url = "https://www.teamrankings.com/college-football/stat/opponent-points-per-game"
 def_td_url = "https://www.teamrankings.com/college-football/stat/opponent-offensive-touchdowns-per-game"
 to_margin_url = "https://www.teamrankings.com/college-football/stat/turnover-margin-per-game"
+ppd_url = "https://bcftoys.com/2025-ppd"
 
 try:
     matchup_page = requests.get(matchup_url)
@@ -21,7 +23,8 @@ try:
     def_ppg_page = requests.get(def_ppg_url)
     def_td_page = requests.get(def_td_url)
     to_margin_page = requests.get(to_margin_url)
-    
+    ppd_page = requests.get(ppd_url)
+
 except requests.RequestException as e:
     print(f"Error retrieving {e}")
 
@@ -31,8 +34,9 @@ off_td_soup = BeautifulSoup(off_td_page.text, "html.parser")
 def_ppg_soup = BeautifulSoup(def_ppg_page.text, "html.parser")
 def_td_soup = BeautifulSoup(def_td_page.text, "html.parser")
 to_margin_soup = BeautifulSoup(to_margin_page.text, "html.parser")
+ppd_soup = BeautifulSoup(ppd_page.text, "html.parser")
 
-# Fetches and assigns home team and away team for search of 
+# Fetches and assigns home team and away team for search
 matchup_titles = ["Away", "Home"]
 matchup_df = pd.DataFrame(columns=matchup_titles)
 matchup_data = matchup_soup.find_all('tr')
@@ -48,7 +52,25 @@ for row in matchup_data:
     length = len(matchup_df)
     matchup_df.loc[length] = teams
 
+# Creates a dataframe from the Points Per Drive table
+ppd_tables_obj = ppd_soup.find_all('tbody')
+ppd_titles_obj = ppd_soup.table.tr.next_sibling
+ppd_titles = [title.text for title in ppd_titles_obj]
+ppd_df = pd.DataFrame(columns = ppd_titles)
+ppd_column_data = [line for line in ppd_soup.table.find_all('tr') if len(line.find_all('strong')) == 0]
+
+for row in ppd_column_data[1:]:
+    row_data = row.find_all('td')
+    row_data_info = [info.text.strip() for info in row_data]
     
+    length = len(ppd_df)
+    ppd_df.loc[length] = row_data_info
+
+ppd_df['OPD'] = pd.to_numeric(ppd_df['OPD'])
+ppd_df['DPD'] = pd.to_numeric(ppd_df['DPD'])
+ppd_df['Team'] = ppd_df['Team'].replace(teamnames.name_map)
+
+
 # Creates a dataframe from the Offense PPG table
 off_ppg_titles_obj = off_ppg_soup.find_all('th')
 off_ppg_titles = [title.text for title in off_ppg_titles_obj]
