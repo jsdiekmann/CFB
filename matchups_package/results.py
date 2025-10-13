@@ -9,49 +9,70 @@ if __name__ == "__main__":
     parser.add_argument("week", type=int, help="Week of season (ex: 7)")
     args = parser.parse_args()
 
-    def get_results(week: int=args.week):
-        results_titles = ["Home", "Home Score", "Away", "Away Score", "Total Score", "Spread", "Winner", "Loser", "O/U"]
-        results_df = pd.DataFrame(columns=results_titles)
-        results_data = get_results(args.year, args.week)
+    lines_data = get_lines(args.year, args.week)
+    results_data = get_results(args.year, args.week)
 
-        lines_titles = ["Home", "Away", "Spread", "O/U" ]
-        lines_df = pd.DataFrame(columns=lines_titles)
-        lines_data = get_lines(args.year, args.week)
+    lines_rows = []
 
-        for line in lines_data:
-            home = line.get("home_team")
-            away = line.get("away_team")
-            game_lines = line.get("lines")
-            spread = 0
-            over_under = 0
-            for book in game_lines:
-                spread += book.get("spread")
-                over_under += book.get("overUnder")
-            spread = round(spread / 3, 2)
-            over_under = round(over_under / 3, 2)
-        
-            line_result = [home, away, spread, over_under]
-            length = len(lines_df)
+    for game in lines_data:
+        home = game["home_team"]
+        away = game["away_team"]
 
-            lines_df.loc[length] = line_result
+        spreads = [s["spread"] for s in game["lines"] if s.get("spread") is not None]
+        overs = [o["overUnder"] for o in game["lines"] if o.get("overUnder") is not None]
 
-        for row in results_data:
-            home_team = row[0]
-            away_team = row[1]
-            home_score = row[2]
-            away_score = row[3]
-            total_score = home_score + away_score
-            spread = abs(home_score - away_score)
-            if max(home_score, away_score) == home_score:
-                winner = home_team
-                loser = away_team
-            else:
-                winner = away_team
-                loser = home_team
-            o_u = "Over" if total_score > over_under else "Under"
-            result = [home_team, home_score,  away_team, away_score, total_score, spread, winner, loser, o_u]
-            length = len(results_df)
+        spread = round(sum(spreads) / len(spreads), 2) if spreads else None
+        over_under = round(sum(overs) / len(overs), 2) if overs else None
 
-            results_df.loc[length] = result
+        lines_rows.append({
+            "Home": home,
+            "Away": away,
+            "Spread": spread,
+            "O/U": over_under
+        })
+
+    lines_df = pd.DataFrame(lines_rows)
+
+    results_rows = []
+
+    for game in results_data:
+        home = game["home_team"]
+        away = game["away_team"]
+        home_score = game["home_points"]
+        away_score = game["away_points"]
+        total_score = home_score + away_score
+        spread = abs(home_score - away_score)
+        winner = home if home_score > away_score else away
+        loser = away if home_score > away_score else home
+
+        results_rows.append({
+            "Home": home,
+            "Home Score": home_score,
+            "Away": away,
+            "Away Score": away_score,
+            "Total Score": total_score,
+            "Spread": spread,
+            "Winner": winner,
+            "Loser": loser   
+        })
+
+    results_df = pd.DataFrame(results_rows)
+
+    merged_df = results_df.merge(
+        lines_df[["Home", "O/U"]],
+        on="Home",
+        how="left"
+    )
+
+    merged_df["O/U Results"] = merged_df.apply(
+        lambda r: (
+            "Over" if r["Total Score"] > r["O/U"]
+            else "Under" if r["Total Score"] < r["O/U"]
+            else "Push"
+        ),
+        axis=1
+    )
+
+    results_df = merged_df.rename(columns={"O/U": "Line O/U"})
     
-        return results_df
+    print(results_df)

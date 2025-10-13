@@ -29,11 +29,11 @@ def get_results(year: int, week: int, season_type: str = "regular", classificati
     results = []
     for game in data:
         if game.get("awayClassification") != "fcs":
-            results.append([
-                game.get("homeTeam"),
-                game.get("awayTeam"),
-                game.get("homePoints"),
-                game.get("awayPoints")]
+            results.append({
+                "home_team": game.get("homeTeam"),
+                "away_team": game.get("awayTeam"),
+                "home_points": game.get("homePoints"),
+                "away_points": game.get("awayPoints")}
             )
     
     return results
