@@ -60,6 +60,9 @@ if __name__ == "__main__":
         })
 
     results_df = pd.DataFrame(results_rows)
+    results_df = teamnames.normalize_names(results_df, ["Home", "Away", "Winner", "Loser"], teamnames.name_map)
+    lines_df = teamnames.normalize_names(lines_df, ["Home", "Away"], teamnames.name_map)
+    previous_data = teamnames.normalize_names(previous_data, ["Home", "Away"], teamnames.name_map)
 
     merged_df = (
         results_df.merge(
@@ -80,10 +83,26 @@ if __name__ == "__main__":
         axis=1
     )
 
-    results_df["Home"] = results_df["Home"].replace(teamnames.name_map)
-    results_df["Away"] = results_df["Away"].replace(teamnames.name_map)
-    results_df["Winner"] = results_df["Winner"].replace(teamnames.name_map)
-    results_df["Loser"] = results_df["Loser"].replace(teamnames.name_map)
-    results_df = merged_df.rename(columns={"O/U": "Line O/U"})
+    merged_df["Expected Points Results"] = merged_df.apply(
+        lambda r: (
+            "Over" if r["Total Score"] > r["Total Expected Points"]
+            else "Under" if r["Total Score"] < r["Total Expected Points"]
+            else "Push"
+        ),
+        axis=1
+    )
 
+    results_df = merged_df.rename(columns={"O/U": "Line O/U", "Total Expected Points": "Exp. Points", "Expected Points Results": "Exp. O/U"})
+
+    column_order = [
+        "Home", "Home Score",
+        "Away", "Away Score",
+        "Total Score",
+        "Line O/U", "Exp. Points",
+        "O/U Results", "Exp. O/U",
+        "Spread",
+        "Winner", "Loser"
+    ]
+
+    results_df = results_df[column_order]
     print(results_df)

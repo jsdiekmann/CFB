@@ -68,7 +68,7 @@ for row in ppd_column_data[1:]:
 
 ppd_df['OPD'] = pd.to_numeric(ppd_df['OPD'])
 ppd_df['DPD'] = pd.to_numeric(ppd_df['DPD'])
-ppd_df['Team'] = ppd_df['Team'].replace(teamnames.name_map)
+ppd_df['Team'] = teamnames.normalize_names(ppd_df, "Team", teamnames.name_map)
 
 
 # Creates a dataframe from the Offense PPG table
