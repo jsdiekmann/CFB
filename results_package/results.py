@@ -13,7 +13,7 @@ if __name__ == "__main__":
 
     lines_data = get_lines(args.year, args.week)
     results_data = get_results(args.year, args.week)
-    # previous_data = pull_previous(args.week)
+    previous_data = pull_previous(args.week)
 
     lines_rows = []
 
@@ -61,10 +61,14 @@ if __name__ == "__main__":
 
     results_df = pd.DataFrame(results_rows)
 
-    merged_df = results_df.merge(
-        lines_df[["Home", "O/U"]],
-        on="Home",
-        how="left"
+    merged_df = (
+        results_df.merge(
+            lines_df[["Home", "O/U"]],
+            on="Home",
+            how="left")
+        .merge(previous_data[["Home", "Total Expected Points"]],
+            on="Home",
+            how="left")
     )
 
     merged_df["O/U Results"] = merged_df.apply(
