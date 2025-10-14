@@ -86,4 +86,14 @@ if __name__ == "__main__":
     results_df["Loser"] = results_df["Loser"].replace(teamnames.name_map)
     results_df = merged_df.rename(columns={"O/U": "Line O/U"})
 
+    column_order = [
+        "Home", "Home Score",
+        "Away", "Away Score",
+        "Total Score",
+        "Line O/U", "Total Expected Points",
+        "O/U Results"
+    ]
+
+    results_df = results_df[column_order]
+
     print(results_df)
