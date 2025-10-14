@@ -1,4 +1,6 @@
 from CFB.ncaa_api.cfbd import get_results, get_lines
+from .pull_previous import pull_previous
+from CFB.scraper_package import teamnames
 import pandas as pd
 import argparse
 
@@ -11,6 +13,7 @@ if __name__ == "__main__":
 
     lines_data = get_lines(args.year, args.week)
     results_data = get_results(args.year, args.week)
+    # previous_data = pull_previous(args.week)
 
     lines_rows = []
 
@@ -73,6 +76,10 @@ if __name__ == "__main__":
         axis=1
     )
 
+    results_df["Home"] = results_df["Home"].replace(teamnames.name_map)
+    results_df["Away"] = results_df["Away"].replace(teamnames.name_map)
+    results_df["Winner"] = results_df["Winner"].replace(teamnames.name_map)
+    results_df["Loser"] = results_df["Loser"].replace(teamnames.name_map)
     results_df = merged_df.rename(columns={"O/U": "Line O/U"})
-    
+
     print(results_df)

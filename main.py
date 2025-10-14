@@ -3,7 +3,7 @@ from google.oauth2.service_account import Credentials
 from gspread_dataframe import set_with_dataframe
 import pandas as pd
 from .matchups_package.matchups import bet_df
-from .matchups_package.results import get_results
+from .results_package.results import get_results
 import re
 import argparse
 
