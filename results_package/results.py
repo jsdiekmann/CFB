@@ -1,6 +1,9 @@
 from CFB.ncaa_api.cfbd import get_results, get_lines
 from .pull_previous import pull_previous
 from CFB.scraper_package import teamnames
+import gspread
+from google.oauth2.service_account import Credentials
+from gspread_dataframe import set_with_dataframe
 import pandas as pd
 import argparse
 
@@ -85,8 +88,8 @@ if __name__ == "__main__":
 
     merged_df["Expected Points Results"] = merged_df.apply(
         lambda r: (
-            "Over" if r["Total Score"] > r["Total Expected Points"]
-            else "Under" if r["Total Score"] < r["Total Expected Points"]
+            "Over" if r["Total Expected Points"] > r["O/U"]
+            else "Under" if r["Total Expected Points"] < r["O/U"]
             else "Push"
         ),
         axis=1
@@ -106,4 +109,26 @@ if __name__ == "__main__":
 
     results_df = results_df[column_order]
 
-    print(results_df)
+    def upload_results(week: int):
+        scopes = [
+            "https://www.googleapis.com/auth/spreadsheets"
+        ]
+        creds = Credentials.from_service_account_file("CFB/API/cfb-tracker.json", scopes=scopes)
+        client = gspread.authorize(creds)
+
+        # Open your Google Sheet by name or ID
+        sheet_id = "1gKOCgH0bcGoR0KUOz2KMnYlen4Xrenhw8uHH5ULIZLk"
+        spreadsheet = client.open_by_key(sheet_id)
+
+        results_sheet_name = f"Week {week} Results"
+
+        try:
+            results_worksheet = spreadsheet.worksheet(results_sheet_name)
+            results_worksheet.clear()
+        except gspread.exceptions.WorksheetNotFound:
+            results_worksheet = spreadsheet.add_worksheet(title=results_sheet_name, rows=100, cols=10)
+        set_with_dataframe(results_worksheet, results_df)
+
+        print(f"Succesfully uploaded Week {week} Results")
+
+    upload_results(args.week)
