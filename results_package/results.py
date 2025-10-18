@@ -57,7 +57,7 @@ if __name__ == "__main__":
             "Away": away,
             "Away Score": away_score,
             "Total Score": total_score,
-            "Spread": spread,
+            "Point Diff.": spread,
             "Winner": winner,
             "Loser": loser   
         })
@@ -69,10 +69,10 @@ if __name__ == "__main__":
 
     merged_df = (
         results_df.merge(
-            lines_df[["Home", "O/U"]],
+            lines_df[["Home", "O/U", "Spread"]],
             on="Home",
             how="left")
-        .merge(previous_data[["Home", "Total Expected Points"]],
+        .merge(previous_data[["Home", "Total Expected Points", "Favorite", "Underdog"]],
             on="Home",
             how="left")
     )
@@ -95,6 +95,15 @@ if __name__ == "__main__":
         axis=1
     )
 
+    merged_df["Expected Spread Results"] = merged_df.apply(
+        lambda r: (
+            "Favorite" if (r["Winner"] == r["Favorite"] & r["Point Diff."] > r["Spread"])
+            else "Push" if (r["Winner"] == r["Favorite"] & r["Point Diff."] == r["Spread"])
+            else "Underdog" 
+        ),
+        axis=1
+    )    
+
     results_df = merged_df.rename(columns={"O/U": "Line O/U", "Total Expected Points": "Exp. Points", "Expected Points Results": "Exp. O/U"})
 
     column_order = [
@@ -103,7 +112,7 @@ if __name__ == "__main__":
         "Total Score",
         "Line O/U", "Exp. Points",
         "O/U Results", "Exp. O/U",
-        "Spread",
+        "Spread", "Point Diff.",
         "Winner", "Loser"
     ]
 
