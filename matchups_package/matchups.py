@@ -68,8 +68,8 @@ for _, row in matchup_with_stats.iterrows():
         "TD/TO (Away)": round(away_td_to, 2),
         "Total Expected Points": round(home_exp_ppg + away_exp_ppg, 2),
         "Expected Spread": round(abs(home_exp_ppg-away_exp_ppg), 2),
-        "Favorite": favorite,
-        "Underdog": dog,
+        "Exp. Favorite": favorite,
+        "Exp. Underdog": dog,
         "TD/TO Differential": round(abs(td_diff), 2),
         "TD/TO Advantage": td_to_advantage
     })
