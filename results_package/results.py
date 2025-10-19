@@ -98,12 +98,23 @@ if __name__ == "__main__":
         axis=1
     )
 
-    # Check this logic to make sure that we are calculating the correct favorite and/or expected fav
-    merged_df["Expected Spread Results"] = merged_df.apply(
+    merged_df["Spread Results"] = merged_df.apply(
         lambda r: (
-            "Favorite" if (r["Winner"] == r["Exp. Favorite"] and r["Point Diff."] > r["Spread"])
-            else "Push" if (r["Winner"] == r["Exp. Favorite"] and r["Point Diff."] == r["Spread"])
-            else "Underdog" 
+            "Favorite" if (r["Winner"] == r["Favorite"] and r["Spread"] > r["Point Diff."])
+            else "Push" if (r["Point Diff"] == r["Spread"])
+            else "Underdog"
+        )
+    )
+
+    # Check this logic to make sure that we are calculating the correct favorite and/or expected fav
+    merged_df["Expected Point Diff. Results"] = merged_df.apply(
+        lambda r: (
+            "Favorite" if (r["Winner"] == r["Exp. Favorite"] and ((r["Exp. Favorite"] != r["Favorite"]) or 
+                                                                   (r["Expected Spread"] > r["Point Diff."] and r["Exp. Favorite"] == r["Favorite"])
+                                                                  ))
+            else "Push" if (r["Point Diff."] == r["Expected Spread"])
+            else "Underdog" # if (r["Winner"] != r["Exp. Favorite"] and ((r["Exp. Favorite"] != r["Favorite"]) or
+            #                                                            (r["Exp. Favorite"] == r["Favorite"]) and r["Expected Spread"] < r["Point Diff."]))
         ),
         axis=1
     )    
@@ -113,7 +124,7 @@ if __name__ == "__main__":
         "Total Expected Points": "Exp. Points",
         "Expected Points Results": "Exp. O/U",
         "Expected Spread": "Exp. Diff.",
-        "Expected Spread Results": "Exp. Spread Winner"
+        "Expected Point Diff. Results": "Exp. Spread Winner"
     })
 
     column_order = [
@@ -124,7 +135,7 @@ if __name__ == "__main__":
         "O/U Results", "Exp. O/U",
         "Favorite", "Spread", 
         "Exp. Favorite", "Exp. Diff.", 
-        "Point Diff.", "Winner",
+        "Point Diff.", "Spread Results",
         "Exp. Spread Winner",
     ]
 
