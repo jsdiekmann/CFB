@@ -75,7 +75,7 @@ if __name__ == "__main__":
             lines_df[["Home", "O/U", "Spread", "Favorite"]],
             on="Home",
             how="left")
-        .merge(previous_data[["Home", "Total Expected Points", "Exp. Favorite", "Exp. Underdog", "Expected Spread"]],
+        .merge(previous_data[["Home", "Total Expected Points", "Exp. Favorite", "Exp. Underdog", "Expected Spread", "TD/TO Differential", "TD/TO Advantage"]],
             on="Home",
             how="left")
     )
@@ -131,7 +131,9 @@ if __name__ == "__main__":
         "Total Expected Points": "Exp. Points",
         "Expected Points Results": "Exp. O/U",
         "Expected Spread": "Exp. Diff.",
-        "Expected Point Diff. Results": "Exp. Spread Winner"
+        "Expected Point Diff. Results": "Exp. Spread Winner",
+        "TD/TO Differential": "TD/TO Diff.",
+        "TD/TO Advantage": "TD/TO Adv."
     })
 
     column_order = [
@@ -143,7 +145,8 @@ if __name__ == "__main__":
         "Favorite", "Spread", 
         "Exp. Favorite", "Exp. Diff.", 
         "Point Diff.", "Winner",
-        "Spread Results", "Exp. Spread Winner"
+        "Spread Results", "Exp. Spread Winner",
+        "TD/TO Diff.", "TD/TO Adv."
     ]
 
     results_df = results_df[column_order]
