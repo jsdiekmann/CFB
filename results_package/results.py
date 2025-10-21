@@ -67,7 +67,7 @@ if __name__ == "__main__":
 
     results_df = pd.DataFrame(results_rows)
     results_df = teamnames.normalize_names(results_df, ["Home", "Away", "Winner", "Loser"], teamnames.name_map)
-    lines_df = teamnames.normalize_names(lines_df, ["Home", "Away"], teamnames.name_map)
+    lines_df = teamnames.normalize_names(lines_df, ["Favorite", "Home", "Away"], teamnames.name_map)
     previous_data = teamnames.normalize_names(previous_data, ["Home", "Away"], teamnames.name_map)
 
     merged_df = (
@@ -100,20 +100,27 @@ if __name__ == "__main__":
 
     merged_df["Spread Results"] = merged_df.apply(
         lambda r: (
-            "Favorite" if (r["Winner"] == r["Favorite"] and r["Spread"] > r["Point Diff."])
-            else "Push" if (r["Point Diff"] == r["Spread"])
+            "Favorite" if (r["Winner"] == r["Favorite"] and r["Spread"] < r["Point Diff."])
+            else "Push" if (r["Point Diff."] == r["Spread"])
             else "Underdog"
-        )
+        ),
+        axis=1
     )
+
 
     # Check this logic to make sure that we are calculating the correct favorite and/or expected fav
     merged_df["Expected Point Diff. Results"] = merged_df.apply(
         lambda r: (
-            "Favorite" if (r["Winner"] == r["Exp. Favorite"] and ((r["Exp. Favorite"] != r["Favorite"]) or 
-                                                                   (r["Expected Spread"] > r["Point Diff."] and r["Exp. Favorite"] == r["Favorite"])
-                                                                  ))
-            else "Push" if (r["Point Diff."] == r["Expected Spread"])
-            else "Underdog" # if (r["Winner"] != r["Exp. Favorite"] and ((r["Exp. Favorite"] != r["Favorite"]) or
+            "Push" if (r["Point Diff."] == r["Expected Spread"])
+            else "Right" if (
+                (r["Exp. Favorite"] == r["Winner"] and r["Exp. Favorite"] != r["Favorite"])
+                or (r["Exp. Favorite"] == r["Winner"] and r["Expected Spread"] >= r["Spread"] and r["Expected Spread"] <= r["Point Diff."])
+                or (r["Exp. Favorite"] == r["Winner"] and r["Expected Spread"] >= r["Spread"] and r["Point Diff."] > r["Spread"])
+                or (r["Exp. Favorite"] == r["Winner"] and r["Exp. Favorite"] == r["Favorite"] and r["Expected Spread"] < r["Spread"] and r["Spread"] > r["Point Diff."])
+                or (r["Exp. Favorite"] != r["Winner"] and r["Exp. Favorite"] != r["Favorite"] and r["Point Diff."] < r["Spread"])
+                or (r["Exp. Favorite"] != r["Winner"] and r["Exp. Favorite"] == r["Favorite"] and r["Expected Spread"] < r["Spread"])
+            )
+            else "Wrong" # if (r["Winner"] != r["Exp. Favorite"] and ((r["Exp. Favorite"] != r["Favorite"]) or
             #                                                            (r["Exp. Favorite"] == r["Favorite"]) and r["Expected Spread"] < r["Point Diff."]))
         ),
         axis=1
@@ -135,8 +142,8 @@ if __name__ == "__main__":
         "O/U Results", "Exp. O/U",
         "Favorite", "Spread", 
         "Exp. Favorite", "Exp. Diff.", 
-        "Point Diff.", "Spread Results",
-        "Exp. Spread Winner",
+        "Point Diff.", "Winner",
+        "Spread Results", "Exp. Spread Winner"
     ]
 
     results_df = results_df[column_order]
@@ -163,4 +170,4 @@ if __name__ == "__main__":
 
         print(f"Succesfully uploaded Week {week} Results")
 
-    print(results_df)
+    upload_results(args.week)
