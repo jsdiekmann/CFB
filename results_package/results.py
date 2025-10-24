@@ -26,10 +26,14 @@ if __name__ == "__main__":
 
         spreads = [s["spread"] for s in game["lines"] if s.get("spread") is not None]
         overs = [o["overUnder"] for o in game["lines"] if o.get("overUnder") is not None]
+        spread_opens = [s["spreadOpen"] for s in game["lines"] if s.get("spreadOpen") is not None]
+        over_opens = [o["overUnderOpen"] for o in game["lines"] if o.get("overUnderOpen") is not None]
 
         spread = round(sum(spreads) / len(spreads), 2) if spreads else None
         over_under = round(sum(overs) / len(overs), 2) if overs else None
-        
+        spread_opens = round(sum(spread_opens) / len(spread_opens), 2) if spread_opens else None
+        over_opens = round(sum(over_opens) / len(over_opens), 2) if over_opens else None
+
         favorite = home if spread < 0 else away
 
         lines_rows.append({
@@ -37,7 +41,9 @@ if __name__ == "__main__":
             "Away": away,
             "Favorite": favorite,
             "Spread": abs(spread),
-            "O/U": over_under  
+            "Opening Spread": abs(spread_opens),
+            "O/U": over_under,
+            "Opening O/U": over_opens
         })
 
     lines_df = pd.DataFrame(lines_rows)
