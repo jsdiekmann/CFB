@@ -78,7 +78,7 @@ if __name__ == "__main__":
 
     merged_df = (
         results_df.merge(
-            lines_df[["Home", "O/U", "Spread", "Favorite"]],
+            lines_df[["Home", "Opening O/U", "O/U", "Opening Spread", "Spread", "Favorite"]],
             on="Home",
             how="left")
         .merge(previous_data[["Home", "Total Expected Points", "Exp. Favorite", "Exp. Underdog", "Expected Spread", "TD/TO Differential", "TD/TO Advantage"]],
@@ -146,9 +146,10 @@ if __name__ == "__main__":
         "Home", "Home Score",
         "Away", "Away Score",
         "Total Score",
+        "Opening O/U",
         "Line O/U", "Exp. Points",
         "O/U Results", "Exp. O/U",
-        "Favorite", "Spread", 
+        "Favorite", "Opening Spread", "Spread", 
         "Exp. Favorite", "Exp. Diff.", 
         "Point Diff.", "Winner",
         "Spread Results", "Exp. Spread Winner",
@@ -179,4 +180,5 @@ if __name__ == "__main__":
 
         print(f"Succesfully uploaded Week {week} Results")
 
-    upload_results(args.week)
+    print(results_df)
+    # upload_results(args.week)
