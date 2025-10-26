@@ -35,15 +35,17 @@ if __name__ == "__main__":
         over_opens = round(sum(over_opens) / len(over_opens), 2) if over_opens else None
 
         favorite = home if spread < 0 else away
+        favorite_opens = home if spread_opens < 0 else away
 
         lines_rows.append({
             "Home": home,
             "Away": away,
             "Favorite": favorite,
+            "Open Favorite": favorite_opens,
             "Spread": abs(spread),
-            "Opening Spread": abs(spread_opens),
+            "Open Spread": abs(spread_opens),
             "O/U": over_under,
-            "Opening O/U": over_opens
+            "Open O/U": over_opens
         })
 
     lines_df = pd.DataFrame(lines_rows)
@@ -73,12 +75,12 @@ if __name__ == "__main__":
 
     results_df = pd.DataFrame(results_rows)
     results_df = teamnames.normalize_names(results_df, ["Home", "Away", "Winner", "Loser"], teamnames.name_map)
-    lines_df = teamnames.normalize_names(lines_df, ["Favorite", "Home", "Away"], teamnames.name_map)
+    lines_df = teamnames.normalize_names(lines_df, ["Favorite", "Home", "Away", "Open Favorite"], teamnames.name_map)
     previous_data = teamnames.normalize_names(previous_data, ["Home", "Away"], teamnames.name_map)
 
     merged_df = (
         results_df.merge(
-            lines_df[["Home", "Opening O/U", "O/U", "Opening Spread", "Spread", "Favorite"]],
+            lines_df[["Home", "Open O/U", "O/U", "Open Spread", "Spread", "Favorite", "Open Favorite"]],
             on="Home",
             how="left")
         .merge(previous_data[["Home", "Total Expected Points", "Exp. Favorite", "Exp. Underdog", "Expected Spread", "TD/TO Differential", "TD/TO Advantage"]],
@@ -104,6 +106,15 @@ if __name__ == "__main__":
         axis=1
     )
 
+    merged_df["Exp. Points vs Open Results"] = merged_df.apply(
+        lambda r: (
+            "Over" if r["Total Expected Points"] > r["Open O/U"]
+            else "Under" if r["Total Expected Points"] < r["Open O/U"]
+            else "Push"
+        ),
+        axis=1
+    )
+
     merged_df["Spread Results"] = merged_df.apply(
         lambda r: (
             "Favorite" if (r["Winner"] == r["Favorite"] and r["Spread"] < r["Point Diff."])
@@ -114,7 +125,6 @@ if __name__ == "__main__":
     )
 
 
-    # Check this logic to make sure that we are calculating the correct favorite and/or expected fav
     merged_df["Expected Point Diff. Results"] = merged_df.apply(
         lambda r: (
             "Push" if (r["Point Diff."] == r["Expected Spread"])
@@ -132,12 +142,31 @@ if __name__ == "__main__":
         axis=1
     )    
 
+    merged_df["Exp. Point Diff. vs Open Results"] = merged_df.apply(
+        lambda r: (
+            "Push" if (r["Point Diff."] == r["Expected Spread"])
+            else "Right" if (
+                (r["Exp. Favorite"] == r["Winner"] and r["Exp. Favorite"] != r["Open Favorite"])
+                or (r["Exp. Favorite"] == r["Winner"] and r["Expected Spread"] >= r["Open Spread"] and r["Expected Spread"] <= r["Point Diff."])
+                or (r["Exp. Favorite"] == r["Winner"] and r["Expected Spread"] >= r["Open Spread"] and r["Point Diff."] > r["Open Spread"])
+                or (r["Exp. Favorite"] == r["Winner"] and r["Exp. Favorite"] == r["Open Favorite"] and r["Expected Spread"] < r["Open Spread"] and r["Open Spread"] > r["Point Diff."])
+                or (r["Exp. Favorite"] != r["Winner"] and r["Exp. Favorite"] != r["Open Favorite"] and r["Point Diff."] < r["Open Spread"])
+                or (r["Exp. Favorite"] != r["Winner"] and r["Exp. Favorite"] == r["Open Favorite"] and r["Expected Spread"] < r["Open Spread"])
+            )
+            else "Wrong" # if (r["Winner"] != r["Exp. Favorite"] and ((r["Exp. Favorite"] != r["Favorite"]) or
+            #                                                            (r["Exp. Favorite"] == r["Favorite"]) and r["Expected Spread"] < r["Point Diff."]))
+        ),
+        axis=1
+    )  
+
     results_df = merged_df.rename(columns={
         "O/U": "Line O/U",
         "Total Expected Points": "Exp. Points",
         "Expected Points Results": "Exp. O/U",
+        "Exp. Points vs Open Results": "Exp. O/U Open",
         "Expected Spread": "Exp. Diff.",
         "Expected Point Diff. Results": "Exp. Spread Winner",
+        "Exp. Point Diff. vs Open Results": "Exp. Winner Open",
         "TD/TO Differential": "TD/TO Diff.",
         "TD/TO Advantage": "TD/TO Adv."
     })
@@ -146,13 +175,16 @@ if __name__ == "__main__":
         "Home", "Home Score",
         "Away", "Away Score",
         "Total Score",
-        "Opening O/U",
+        "Open O/U",
         "Line O/U", "Exp. Points",
-        "O/U Results", "Exp. O/U",
-        "Favorite", "Opening Spread", "Spread", 
+        "O/U Results", "Exp. O/U Open",
+        "Exp. O/U",
+        "Open Favorite", "Open Spread", 
+        "Favorite", "Spread", 
         "Exp. Favorite", "Exp. Diff.", 
         "Point Diff.", "Winner",
-        "Spread Results", "Exp. Spread Winner",
+        "Spread Results", "Exp. Winner Open",
+        "Exp. Spread Winner",
         "TD/TO Diff.", "TD/TO Adv."
     ]
 
@@ -180,5 +212,4 @@ if __name__ == "__main__":
 
         print(f"Succesfully uploaded Week {week} Results")
 
-    print(results_df)
-    # upload_results(args.week)
+    upload_results(args.week)
