@@ -38,6 +38,7 @@ name_map = {
     "South Florida": "S Florida",
     "San Diego State": "San Diego St",
     "San Jose State": "San Jose St",
+    "San José State": "San Jose St",
     "Southern Mississippi": "Southern Miss",
     "Texas State": "Texas St",
     "Connecticut": "UConn",
